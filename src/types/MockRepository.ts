@@ -1,13 +1,10 @@
 import IRepository from './IRepository';
-import { FilterQuery, UpdateQuery, Model } from 'mongoose';
-import { DeleteResult, UpdateResult } from 'mongodb';
+import { FilterQuery, UpdateQuery } from 'mongoose';
+import { UpdateResult, DeleteResult } from 'mongodb';
 import { QueryOptions } from './others';
 
-abstract class Repository<T> implements IRepository<T> {
-  model: Model<T>;
-  constructor(model: Model<T>) {
-    this.model = model;
-  }
+abstract class MockRepository<T> implements IRepository<T> {
+  constructor() {}
   create(data: T | T[]): Promise<void | T | T[]> {
     throw new Error('Method not implemented.');
   }
@@ -49,4 +46,4 @@ abstract class Repository<T> implements IRepository<T> {
   }
 }
 
-export default Repository;
+export default MockRepository;
