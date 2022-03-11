@@ -1,7 +1,6 @@
 import IRepository from './types/IRepository';
 import Repository from './types/Repository';
-import { QueryOptions } from './types/others';
-import { PaginatedResult } from './types/others';
+import { QueryOptions, PaginatedResult, UpdateOptions } from './types/others';
 
-export { IRepository, QueryOptions, PaginatedResult };
+export { IRepository, QueryOptions, UpdateOptions, PaginatedResult };
 export default Repository;
