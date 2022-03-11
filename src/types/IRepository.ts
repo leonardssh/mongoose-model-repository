@@ -13,7 +13,7 @@ interface IRepository<T> {
   countDocuments(filter: FilterQuery<T>): Promise<number>;
 
   //Pagination
-  findAndPaginate( filter: FilterQuery<T>, page: number, limit: number, sort: any, select?: string, options?: { lean?: boolean }): Promise<PaginatedResult<T>>
+  findAndPaginate( filter: FilterQuery<T>, page: number, limit: number, sort: any ): Promise<PaginatedResult<T>>
 
 
   //deletion
