@@ -5,20 +5,20 @@
   "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build":"tsc",
-    "prepare":"npm run build",
+    "build": "tsc",
+    "prepare": "npm run build",
     "prepublish": "npm run format",
     "format": "prettier --write .",
     "preversion": "npm run format",
     "version": "npm run format && git add -A src",
-    "postversion" : "git push && git push --tags"
+    "postversion": "git push && git push --tags"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Ose-4g/mongoose-model-repository.git"
   },
   "keywords": [],
-  "author":"ose4g and lawal-create",
+  "author": "ose4g and lawal-create",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/Ose-4g/mongoose-model-repository/issues"
@@ -31,7 +31,9 @@
   "dependencies": {
     "mongoose": "^6.2.5"
   },
-  "files": ["lib/**/*"],
+  "files": [
+    "lib/**/*"
+  ],
   "contributors": [
     {
       "name": "Osemudiamen Itua",
