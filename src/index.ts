@@ -1,7 +1,5 @@
-import IRepository from "./types/IRepository";
-import Repository from "./types/Repository";
+import IRepository from './types/IRepository';
+import Repository from './types/Repository';
 
-export {
-    IRepository
-}
-export default Repository
+export { IRepository };
+export default Repository;
