@@ -1,7 +1,7 @@
 import IRepository from './IRepository';
 import { FilterQuery, UpdateQuery, Model } from 'mongoose';
 import { DeleteResult, UpdateResult } from 'mongodb';
-import { QueryOptions } from './others';
+import { QueryOptions, PaginatedResult } from './others';
 
 abstract class Repository<T> implements IRepository<T> {
   model: Model<T>;
@@ -57,6 +57,36 @@ abstract class Repository<T> implements IRepository<T> {
     let query = this.model.find(filter).countDocuments();
     const data = await query;
     return data;
+  }
+
+  async findAndPaginate(
+    filter: FilterQuery<T>,
+    page: number,
+    limit: number,
+    sort: any
+  ): Promise<PaginatedResult<T>> {
+    const totalDocuments = await this.model.countDocuments(filter);
+    const totalPages = Math.ceil(totalDocuments / limit);
+    const currentPage = page;
+    const nextPage = page + 1 <= totalPages ? page + 1 : null;
+    const prevPage = page - 1 > 0 ? page - 1 : null;
+
+    let query = this.model.find(filter);
+
+    if (sort) {
+      query = query.sort(sort);
+    }
+
+    const data = await query.skip((page - 1) * limit).limit(limit);
+
+    return {
+      totalDocuments,
+      totalPages,
+      currentPage,
+      nextPage,
+      prevPage,
+      data,
+    };
   }
   findByIdAndDelete(id: string): Promise<T | null> {
     throw new Error('Method not implemented.');

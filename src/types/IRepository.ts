@@ -1,6 +1,6 @@
 import { FilterQuery, UpdateQuery } from 'mongoose';
 import { UpdateResult, DeleteResult } from 'mongodb';
-import { QueryOptions } from './others';
+import { QueryOptions, PaginatedResult } from './others';
 
 interface IRepository<T> {
   //create
@@ -11,6 +11,10 @@ interface IRepository<T> {
   findOne(filter: FilterQuery<T>, options?: QueryOptions): Promise<T | null>;
   find(filter: FilterQuery<T>, options?: QueryOptions): Promise<T[]>;
   countDocuments(filter: FilterQuery<T>): Promise<number>;
+
+  //Pagination
+  findAndPaginate( filter: FilterQuery<T>, page: number, limit: number, sort: any, select?: string, options?: { lean?: boolean }): Promise<PaginatedResult<T>>
+
 
   //deletion
   findByIdAndDelete(id: string): Promise<T | null>;
