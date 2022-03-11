@@ -1,0 +1,45 @@
+{
+  "name": "mongoose-model-repository",
+  "version": "1.0.0",
+  "description": "npm package for using repository pattern with mongoose.",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build":"tsc",
+    "prepare":"npm run build",
+    "prepublish": "npm run format",
+    "format": "prettier --write .",
+    "preversion": "npm run format",
+    "version": "npm run format && git add -A src",
+    "postversion" : "git push && git push --tags"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ose-4g/mongoose-model-repository.git"
+  },
+  "keywords": [],
+  "author":"ose4g and lawal-create",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Ose-4g/mongoose-model-repository/issues"
+  },
+  "homepage": "https://github.com/Ose-4g/mongoose-model-repository#readme",
+  "devDependencies": {
+    "prettier": "^2.5.1",
+    "typescript": "^4.6.2"
+  },
+  "dependencies": {
+    "mongoose": "^6.2.5"
+  },
+  "files": ["lib/**/*"],
+  "contributors": [
+    {
+      "name": "Osemudiamen Itua",
+      "email": "osemudiamenitua@gmail.com"
+    },
+    {
+      "name": "Hakeem Lawal",
+      "email": "lawizyhal@gmail.com"
+    }
+  ]
+}
