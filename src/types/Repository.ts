@@ -1,27 +1,92 @@
 import IRepository from './IRepository';
 import { FilterQuery, UpdateQuery, Model } from 'mongoose';
 import { DeleteResult, UpdateResult } from 'mongodb';
-import { QueryOptions } from './others';
+import { QueryOptions, PaginatedResult } from './others';
 
 abstract class Repository<T> implements IRepository<T> {
   model: Model<T>;
   constructor(model: Model<T>) {
     this.model = model;
   }
-  create(data: T | T[]): Promise<void | T | T[]> {
-    throw new Error('Method not implemented.');
+  async create(data: T | T[]): Promise<void | T | T[]> {
+    const doc = await this.model.create(data);
+    return doc;
   }
-  findById(id: string, options?: QueryOptions): Promise<T | null> {
-    throw new Error('Method not implemented.');
+  async findById(id: string, options?: QueryOptions): Promise<T | null> {
+    let query = this.model.findById(id)
+    const{ select, lean } = options as QueryOptions
+    if (select) query = query.select(select);
+
+    if (options) {
+      if (lean) query = query.lean();
+    }
+    const data = await query;
+
+    return data;
   }
-  findOne(filter: FilterQuery<T>, option?: QueryOptions): Promise<T | null> {
-    throw new Error('Method not implemented.');
+  async findOne(filter: FilterQuery<T>, options?: QueryOptions): Promise<T | null> {
+    let query = this.model.findOne(filter);
+    const{ select, lean } = options as QueryOptions
+    if (select) query = query.select(select);
+
+    if (options) {
+      if (lean) query = query.lean();
+    }
+    const data = await query;
+
+    return data;
   }
-  find(filter: FilterQuery<T>, options?: QueryOptions): Promise<T[]> {
-    throw new Error('Method not implemented.');
+  async find(filter: FilterQuery<T>, options?: QueryOptions): Promise<T[]> {
+    let query = this.model.find(filter);
+    const{ select, lean, sort, populate } = options as QueryOptions
+    if (select) query = query.select(select);
+
+    if (options) {
+      if (lean) query = query.lean();
+      if(sort) query = query.sort(sort)
+      if(typeof populate === "string") query = query.populate(populate)
+      if(typeof populate === "object"){
+        for(const item of populate) query = query.populate(item)
+      }
+    }
+    const data = await query;
+
+    return data;
   }
-  countDocuments(filter: FilterQuery<T>): Promise<number> {
-    throw new Error('Method not implemented.');
+  async countDocuments(filter: FilterQuery<T>): Promise<number> {
+    let query = this.model.find(filter).countDocuments();
+    const data = await query;
+    return data;
+  }
+
+  async findAndPaginate(
+    filter: FilterQuery<T>,
+    page: number,
+    limit: number,
+    sort: any
+  ): Promise<PaginatedResult<T>> {
+    const totalDocuments = await this.model.countDocuments(filter);
+    const totalPages = Math.ceil(totalDocuments / limit);
+    const currentPage = page;
+    const nextPage = page + 1 <= totalPages ? page + 1 : null;
+    const prevPage = page - 1 > 0 ? page - 1 : null;
+
+    let query = this.model.find(filter);
+
+    if (sort) {
+      query = query.sort(sort);
+    }
+
+    const data = await query.skip((page - 1) * limit).limit(limit);
+
+    return {
+      totalDocuments,
+      totalPages,
+      currentPage,
+      nextPage,
+      prevPage,
+      data,
+    };
   }
   findByIdAndDelete(id: string): Promise<T | null> {
     throw new Error('Method not implemented.');
