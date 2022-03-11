@@ -12,7 +12,6 @@ abstract class Repository<T> implements IRepository<T> {
 
   async create(data: T | T[]): Promise<void | T | T[]> {
     const doc = await this.model.create(data);
-    await this.model.findOne().populate('ahjkahbd');
     return doc;
   }
   async findById(id: string, options?: QueryOptions): Promise<T | null> {
