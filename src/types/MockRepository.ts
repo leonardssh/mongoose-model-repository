@@ -46,7 +46,7 @@ abstract class MockRepository<T> implements IRepository<T> {
   }
   findAndPaginate(filter: FilterQuery<T>, page: number, limit: number, sort: any): Promise<PaginatedResult<T>> {
     throw new Error('Method not implemented.');
-}
+  }
 }
 
 export default MockRepository;

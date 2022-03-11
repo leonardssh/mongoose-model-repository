@@ -4,7 +4,7 @@ import { DeleteResult, UpdateResult } from 'mongodb';
 import { QueryOptions, PaginatedResult, UpdateOptions } from './others';
 
 abstract class Repository<T> implements IRepository<T> {
-  protected  model: Model<T>;
+  protected model: Model<T>;
 
   constructor(model: Model<T>) {
     this.model = model;
@@ -12,22 +12,21 @@ abstract class Repository<T> implements IRepository<T> {
 
   async create(data: T | T[]): Promise<void | T | T[]> {
     const doc = await this.model.create(data);
-    await this.model.findOne().populate('ahjkahbd')
+    await this.model.findOne().populate('ahjkahbd');
     return doc;
   }
   async findById(id: string, options?: QueryOptions): Promise<T | null> {
-    let query = this.model.findById(id)
-    const{ select, lean } = options as QueryOptions
+    let query = this.model.findById(id);
+    const { select, lean } = options as QueryOptions;
     if (select) query = query.select(select);
 
-    if(options)
-    {
-      const{ select, lean, sort, populate } = options
+    if (options) {
+      const { select, lean, sort, populate } = options;
       if (select) query = query.select(select);
-      if(sort) query = query.sort(sort)
-      if(typeof populate === "string") query = query.populate(populate) as any
-      if(typeof populate === "object"){
-        for(const item of populate) query = query.populate(item) as any
+      if (sort) query = query.sort(sort);
+      if (typeof populate === 'string') query = query.populate(populate) as any;
+      if (typeof populate === 'object') {
+        for (const item of populate) query = query.populate(item) as any;
       }
       if (lean) query = query.lean();
     }
@@ -37,17 +36,16 @@ abstract class Repository<T> implements IRepository<T> {
   }
   async findOne(filter: FilterQuery<T>, options?: QueryOptions): Promise<T | null> {
     let query = this.model.findOne(filter);
-    const{ select, lean } = options as QueryOptions
+    const { select, lean } = options as QueryOptions;
     if (select) query = query.select(select);
 
-    if(options)
-    {
-      const{ select, lean, sort, populate } = options
+    if (options) {
+      const { select, lean, sort, populate } = options;
       if (select) query = query.select(select);
-      if(sort) query = query.sort(sort)
-      if(typeof populate === "string") query = query.populate(populate) as any
-      if(typeof populate === "object"){
-        for(const item of populate) query = query.populate(item) as any
+      if (sort) query = query.sort(sort);
+      if (typeof populate === 'string') query = query.populate(populate) as any;
+      if (typeof populate === 'object') {
+        for (const item of populate) query = query.populate(item) as any;
       }
       if (lean) query = query.lean();
     }
@@ -57,15 +55,14 @@ abstract class Repository<T> implements IRepository<T> {
   }
   async find(filter: FilterQuery<T>, options?: QueryOptions): Promise<T[]> {
     let query = this.model.find(filter);
-    
 
     if (options) {
-      const{ select, lean, sort, populate } = options as QueryOptions
+      const { select, lean, sort, populate } = options as QueryOptions;
       if (select) query = query.select(select);
-      if(sort) query = query.sort(sort)
-      if(typeof populate === "string") query = query.populate(populate)
-      if(typeof populate === "object"){
-        for(const item of populate) query = query.populate(item)
+      if (sort) query = query.sort(sort);
+      if (typeof populate === 'string') query = query.populate(populate);
+      if (typeof populate === 'object') {
+        for (const item of populate) query = query.populate(item);
       }
       if (lean) query = query.lean();
     }
@@ -93,14 +90,13 @@ abstract class Repository<T> implements IRepository<T> {
 
     let query = this.model.find(filter);
 
-    if(options)
-    {
-      const{ select, lean, sort, populate } = options
+    if (options) {
+      const { select, lean, sort, populate } = options;
       if (select) query = query.select(select);
-      if(sort) query = query.sort(sort)
-      if(typeof populate === "string") query = query.populate(populate)
-      if(typeof populate === "object"){
-        for(const item of populate) query = query.populate(item)
+      if (sort) query = query.sort(sort);
+      if (typeof populate === 'string') query = query.populate(populate);
+      if (typeof populate === 'object') {
+        for (const item of populate) query = query.populate(item);
       }
       if (lean) query = query.lean();
     }
@@ -116,40 +112,40 @@ abstract class Repository<T> implements IRepository<T> {
       data,
     };
   }
-  
+
   async findByIdAndDelete(id: string): Promise<T | null> {
-    const doc = await this.model.findByIdAndDelete(id)
+    const doc = await this.model.findByIdAndDelete(id);
     return doc;
   }
 
   async findOneAndDelete(filter: FilterQuery<T>): Promise<T | null> {
-    const doc = await this.model.findOneAndDelete(filter)
+    const doc = await this.model.findOneAndDelete(filter);
     return doc;
   }
-  
+
   async deleteOne(filter: FilterQuery<T>): Promise<DeleteResult> {
-    const result = await this.model.deleteOne(filter) ;
-    return result
+    const result = await this.model.deleteOne(filter);
+    return result;
   }
   async deleteMany(filter: FilterQuery<T>): Promise<DeleteResult> {
-    const result = await this.model.deleteMany(filter)
-    return result
+    const result = await this.model.deleteMany(filter);
+    return result;
   }
   async updateMany(filter: FilterQuery<T>, update: UpdateQuery<T>): Promise<UpdateResult> {
-    const result = await this.model.updateMany(filter,update)
-    return result
+    const result = await this.model.updateMany(filter, update);
+    return result;
   }
   async updateOne(filter: FilterQuery<T>, update: UpdateQuery<T>): Promise<UpdateResult> {
-    const result = await this.model.updateOne(filter,update)
-    return result
+    const result = await this.model.updateOne(filter, update);
+    return result;
   }
-  async findOneAndUpdate(filter: FilterQuery<T>, update: UpdateQuery<T>,options?:UpdateOptions): Promise<T | null> {
-    const result = await this.model.findOneAndUpdate(filter,update,options)
-    return result
+  async findOneAndUpdate(filter: FilterQuery<T>, update: UpdateQuery<T>, options?: UpdateOptions): Promise<T | null> {
+    const result = await this.model.findOneAndUpdate(filter, update, options);
+    return result;
   }
-  async findByIdAndUpdate(filter: FilterQuery<T>, update: UpdateQuery<T>,options?:UpdateOptions): Promise<T | null> {
-    const result = await this.model.findByIdAndUpdate(filter,update,options)
-    return result
+  async findByIdAndUpdate(filter: FilterQuery<T>, update: UpdateQuery<T>, options?: UpdateOptions): Promise<T | null> {
+    const result = await this.model.findByIdAndUpdate(filter, update, options);
+    return result;
   }
 }
 

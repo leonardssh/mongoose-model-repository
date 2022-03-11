@@ -13,8 +13,12 @@ interface IRepository<T> {
   countDocuments(filter: FilterQuery<T>): Promise<number>;
 
   //Pagination
-  findAndPaginate( filter: FilterQuery<T>, page: number, limit: number, options?: QueryOptions ): Promise<PaginatedResult<T>>
-
+  findAndPaginate(
+    filter: FilterQuery<T>,
+    page: number,
+    limit: number,
+    options?: QueryOptions
+  ): Promise<PaginatedResult<T>>;
 
   //deletion
   findByIdAndDelete(id: string): Promise<T | null>;
@@ -25,8 +29,8 @@ interface IRepository<T> {
   //update
   updateMany(filter: FilterQuery<T>, update: UpdateQuery<T>): Promise<UpdateResult>;
   updateOne(filter: FilterQuery<T>, update: UpdateQuery<T>): Promise<UpdateResult>;
-  findOneAndUpdate(filter: FilterQuery<T>, update: UpdateQuery<T>,options?:UpdateOptions): Promise<T | null>;
-  findByIdAndUpdate(filter: FilterQuery<T>, update: UpdateQuery<T>,options?:UpdateOptions): Promise<T | null>;
+  findOneAndUpdate(filter: FilterQuery<T>, update: UpdateQuery<T>, options?: UpdateOptions): Promise<T | null>;
+  findByIdAndUpdate(filter: FilterQuery<T>, update: UpdateQuery<T>, options?: UpdateOptions): Promise<T | null>;
 }
 
 export default IRepository;

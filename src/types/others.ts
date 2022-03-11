@@ -17,8 +17,8 @@ export interface PaginatedResult<T> {
 }
 
 export interface UpdateOptions {
-    upsert?:boolean;
-    lean?:boolean;
-    returnDocument?: 'before' | 'after';
-    overwrite?: boolean
+  upsert?: boolean;
+  lean?: boolean;
+  returnDocument?: 'before' | 'after';
+  overwrite?: boolean;
 }
