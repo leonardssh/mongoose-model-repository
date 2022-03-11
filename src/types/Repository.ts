@@ -1,10 +1,11 @@
 import IRepository from './IRepository';
 import { FilterQuery, UpdateQuery, Model, Query } from 'mongoose';
 import { DeleteResult, UpdateResult } from 'mongodb';
-import { QueryOptions, PaginatedResult } from './others';
+import { QueryOptions, PaginatedResult, UpdateOptions } from './others';
 
 abstract class Repository<T> implements IRepository<T> {
-  model: Model<T>;
+  protected  model: Model<T>;
+
   constructor(model: Model<T>) {
     this.model = model;
   }
@@ -115,29 +116,40 @@ abstract class Repository<T> implements IRepository<T> {
       data,
     };
   }
-  findByIdAndDelete(id: string): Promise<T | null> {
-    throw new Error('Method not implemented.');
+  
+  async findByIdAndDelete(id: string): Promise<T | null> {
+    const doc = await this.model.findByIdAndDelete(id)
+    return doc;
   }
-  findOneAndDelete(filter: FilterQuery<T>): Promise<T | null> {
-    throw new Error('Method not implemented.');
+
+  async findOneAndDelete(filter: FilterQuery<T>): Promise<T | null> {
+    const doc = await this.model.findOneAndDelete(filter)
+    return doc;
   }
-  deleteOne(filter: FilterQuery<T>): Promise<DeleteResult> {
-    throw new Error('Method not implemented.');
+  
+  async deleteOne(filter: FilterQuery<T>): Promise<DeleteResult> {
+    const result = await this.model.deleteOne(filter) ;
+    return result
   }
-  deleteMany(filter: FilterQuery<T>): Promise<DeleteResult> {
-    throw new Error('Method not implemented.');
+  async deleteMany(filter: FilterQuery<T>): Promise<DeleteResult> {
+    const result = await this.model.deleteMany(filter)
+    return result
   }
-  updateMany(filter: FilterQuery<T>, update: UpdateQuery<T>): Promise<UpdateResult> {
-    throw new Error('Method not implemented.');
+  async updateMany(filter: FilterQuery<T>, update: UpdateQuery<T>): Promise<UpdateResult> {
+    const result = await this.model.updateMany(filter,update)
+    return result
   }
-  updateOne(filter: FilterQuery<T>, update: UpdateQuery<T>): Promise<UpdateResult> {
-    throw new Error('Method not implemented.');
+  async updateOne(filter: FilterQuery<T>, update: UpdateQuery<T>): Promise<UpdateResult> {
+    const result = await this.model.updateOne(filter,update)
+    return result
   }
-  findOneAndUpdate(filter: FilterQuery<T>, update: UpdateQuery<T>): Promise<T | null> {
-    throw new Error('Method not implemented.');
+  async findOneAndUpdate(filter: FilterQuery<T>, update: UpdateQuery<T>,options?:UpdateOptions): Promise<T | null> {
+    const result = await this.model.findOneAndUpdate(filter,update,options)
+    return result
   }
-  findByIdAndUpdate(filter: FilterQuery<T>, update: UpdateQuery<T>): Promise<T | null> {
-    throw new Error('Method not implemented.');
+  async findByIdAndUpdate(filter: FilterQuery<T>, update: UpdateQuery<T>,options?:UpdateOptions): Promise<T | null> {
+    const result = await this.model.findByIdAndUpdate(filter,update,options)
+    return result
   }
 }
 

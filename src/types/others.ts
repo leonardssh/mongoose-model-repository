@@ -15,3 +15,10 @@ export interface PaginatedResult<T> {
   prevPage: number | null;
   data: T[];
 }
+
+export interface UpdateOptions {
+    upsert?:boolean;
+    lean?:boolean;
+    returnDocument?: 'before' | 'after';
+    overwrite?: boolean
+}
