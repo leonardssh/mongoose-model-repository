@@ -7,7 +7,6 @@ abstract class Repository<T> implements IRepository<T> {
   model: Model<T>;
   constructor(model: Model<T>) {
     this.model = model;
-   
   }
   create(data: T | T[]): Promise<void | T | T[]> {
     throw new Error('Method not implemented.');
@@ -48,8 +47,6 @@ abstract class Repository<T> implements IRepository<T> {
   findByIdAndUpdate(filter: FilterQuery<T>, update: UpdateQuery<T>): Promise<T | null> {
     throw new Error('Method not implemented.');
   }
-
-  
 }
 
 export default Repository;
