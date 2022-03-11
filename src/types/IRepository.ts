@@ -8,7 +8,7 @@ interface IRepository<T> {
 
   //query
   findById(id: string, options?: QueryOptions): Promise<T | null>;
-  findOne(filter: FilterQuery<T>, option?: QueryOptions): Promise<T | null>;
+  findOne(filter: FilterQuery<T>, options?: QueryOptions): Promise<T | null>;
   find(filter: FilterQuery<T>, options?: QueryOptions): Promise<T[]>;
   countDocuments(filter: FilterQuery<T>): Promise<number>;
 
