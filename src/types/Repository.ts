@@ -1,5 +1,5 @@
 import IRepository from './IRepository';
-import { FilterQuery, UpdateQuery, Model } from 'mongoose';
+import { FilterQuery, UpdateQuery, Model, Query } from 'mongoose';
 import { DeleteResult, UpdateResult } from 'mongodb';
 import { QueryOptions, PaginatedResult } from './others';
 
@@ -8,8 +8,10 @@ abstract class Repository<T> implements IRepository<T> {
   constructor(model: Model<T>) {
     this.model = model;
   }
+
   async create(data: T | T[]): Promise<void | T | T[]> {
     const doc = await this.model.create(data);
+    await this.model.findOne().populate('ahjkahbd')
     return doc;
   }
   async findById(id: string, options?: QueryOptions): Promise<T | null> {
@@ -17,7 +19,15 @@ abstract class Repository<T> implements IRepository<T> {
     const{ select, lean } = options as QueryOptions
     if (select) query = query.select(select);
 
-    if (options) {
+    if(options)
+    {
+      const{ select, lean, sort, populate } = options
+      if (select) query = query.select(select);
+      if(sort) query = query.sort(sort)
+      if(typeof populate === "string") query = query.populate(populate) as any
+      if(typeof populate === "object"){
+        for(const item of populate) query = query.populate(item) as any
+      }
       if (lean) query = query.lean();
     }
     const data = await query;
@@ -29,7 +39,15 @@ abstract class Repository<T> implements IRepository<T> {
     const{ select, lean } = options as QueryOptions
     if (select) query = query.select(select);
 
-    if (options) {
+    if(options)
+    {
+      const{ select, lean, sort, populate } = options
+      if (select) query = query.select(select);
+      if(sort) query = query.sort(sort)
+      if(typeof populate === "string") query = query.populate(populate) as any
+      if(typeof populate === "object"){
+        for(const item of populate) query = query.populate(item) as any
+      }
       if (lean) query = query.lean();
     }
     const data = await query;
@@ -38,16 +56,17 @@ abstract class Repository<T> implements IRepository<T> {
   }
   async find(filter: FilterQuery<T>, options?: QueryOptions): Promise<T[]> {
     let query = this.model.find(filter);
-    const{ select, lean, sort, populate } = options as QueryOptions
-    if (select) query = query.select(select);
+    
 
     if (options) {
-      if (lean) query = query.lean();
+      const{ select, lean, sort, populate } = options as QueryOptions
+      if (select) query = query.select(select);
       if(sort) query = query.sort(sort)
       if(typeof populate === "string") query = query.populate(populate)
       if(typeof populate === "object"){
         for(const item of populate) query = query.populate(item)
       }
+      if (lean) query = query.lean();
     }
     const data = await query;
 
@@ -63,7 +82,7 @@ abstract class Repository<T> implements IRepository<T> {
     filter: FilterQuery<T>,
     page: number,
     limit: number,
-    sort: any
+    options?: QueryOptions
   ): Promise<PaginatedResult<T>> {
     const totalDocuments = await this.model.countDocuments(filter);
     const totalPages = Math.ceil(totalDocuments / limit);
@@ -73,8 +92,16 @@ abstract class Repository<T> implements IRepository<T> {
 
     let query = this.model.find(filter);
 
-    if (sort) {
-      query = query.sort(sort);
+    if(options)
+    {
+      const{ select, lean, sort, populate } = options
+      if (select) query = query.select(select);
+      if(sort) query = query.sort(sort)
+      if(typeof populate === "string") query = query.populate(populate)
+      if(typeof populate === "object"){
+        for(const item of populate) query = query.populate(item)
+      }
+      if (lean) query = query.lean();
     }
 
     const data = await query.skip((page - 1) * limit).limit(limit);

@@ -1,7 +1,7 @@
 import IRepository from './IRepository';
 import { FilterQuery, UpdateQuery } from 'mongoose';
 import { UpdateResult, DeleteResult } from 'mongodb';
-import { QueryOptions } from './others';
+import { PaginatedResult, QueryOptions } from './others';
 
 abstract class MockRepository<T> implements IRepository<T> {
   constructor() {}
@@ -44,6 +44,9 @@ abstract class MockRepository<T> implements IRepository<T> {
   findByIdAndUpdate(filter: FilterQuery<T>, update: UpdateQuery<T>): Promise<T | null> {
     throw new Error('Method not implemented.');
   }
+  findAndPaginate(filter: FilterQuery<T>, page: number, limit: number, sort: any): Promise<PaginatedResult<T>> {
+    throw new Error('Method not implemented.');
+}
 }
 
 export default MockRepository;
