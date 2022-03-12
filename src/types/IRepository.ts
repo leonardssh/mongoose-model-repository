@@ -1,6 +1,6 @@
 import { FilterQuery, UpdateQuery } from 'mongoose';
 import { UpdateResult, DeleteResult } from 'mongodb';
-import { QueryOptions, PaginatedResult, UpdateOptions } from './others';
+import { QueryOptions, PaginatedResult, UpdateOptions, QueryOptionsExtended } from './others';
 
 interface IRepository<T> {
   //create
@@ -9,7 +9,7 @@ interface IRepository<T> {
   //query
   findById(id: string, options?: QueryOptions): Promise<T | null>;
   findOne(filter: FilterQuery<T>, options?: QueryOptions): Promise<T | null>;
-  find(filter: FilterQuery<T>, options?: QueryOptions): Promise<T[]>;
+  find(filter: FilterQuery<T>, options?: QueryOptionsExtended): Promise<T[]>;
   countDocuments(filter: FilterQuery<T>): Promise<number>;
 
   //Pagination

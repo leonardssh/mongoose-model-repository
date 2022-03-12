@@ -1,8 +1,12 @@
+
 export interface QueryOptions {
   sort?: any;
   select?: string;
   lean?: boolean;
   populate?: string | string[];
+}
+
+export interface QueryOptionsExtended extends QueryOptions {
   skip?: number;
   limit?: number;
 }
