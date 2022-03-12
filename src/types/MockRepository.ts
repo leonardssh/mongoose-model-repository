@@ -1,7 +1,7 @@
 import IRepository from './IRepository';
 import { FilterQuery, UpdateQuery } from 'mongoose';
 import { UpdateResult, DeleteResult } from 'mongodb';
-import { PaginatedResult, QueryOptions } from './others';
+import { PaginatedResult, QueryOptions, UpdateOptions } from './others';
 
 abstract class MockRepository<T> implements IRepository<T> {
   constructor() {}
@@ -38,10 +38,10 @@ abstract class MockRepository<T> implements IRepository<T> {
   updateOne(filter: FilterQuery<T>, update: UpdateQuery<T>): Promise<UpdateResult> {
     throw new Error('Method not implemented.');
   }
-  findOneAndUpdate(filter: FilterQuery<T>, update: UpdateQuery<T>): Promise<T | null> {
+  findOneAndUpdate(filter: FilterQuery<T>, update: UpdateQuery<T>, options?: UpdateOptions): Promise<T | null> {
     throw new Error('Method not implemented.');
   }
-  findByIdAndUpdate(filter: FilterQuery<T>, update: UpdateQuery<T>): Promise<T | null> {
+  findByIdAndUpdate(filter: FilterQuery<T>, update: UpdateQuery<T>, options?: UpdateOptions): Promise<T | null> {
     throw new Error('Method not implemented.');
   }
   findAndPaginate(filter: FilterQuery<T>, page: number, limit: number, sort: any): Promise<PaginatedResult<T>> {

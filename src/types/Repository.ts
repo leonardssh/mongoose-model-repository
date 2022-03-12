@@ -1,7 +1,7 @@
 import IRepository from './IRepository';
 import { FilterQuery, UpdateQuery, Model, Query } from 'mongoose';
 import { DeleteResult, UpdateResult } from 'mongodb';
-import { QueryOptions, PaginatedResult, UpdateOptions } from './others';
+import { QueryOptions, PaginatedResult, UpdateOptions, QueryOptionsExtended } from './others';
 
 abstract class Repository<T> implements IRepository<T> {
   protected model: Model<T>;
@@ -52,17 +52,19 @@ abstract class Repository<T> implements IRepository<T> {
 
     return data;
   }
-  async find(filter: FilterQuery<T>, options?: QueryOptions): Promise<T[]> {
+  async find(filter: FilterQuery<T>, options?: QueryOptionsExtended): Promise<T[]> {
     let query = this.model.find(filter);
 
     if (options) {
-      const { select, lean, sort, populate } = options as QueryOptions;
+      const { select, lean, sort, populate, skip, limit } = options as QueryOptionsExtended;
       if (select) query = query.select(select);
       if (sort) query = query.sort(sort);
       if (typeof populate === 'string') query = query.populate(populate);
       if (typeof populate === 'object') {
         for (const item of populate) query = query.populate(item);
       }
+      if (skip) query = query.skip(skip);
+      if (limit) query = query.limit(limit);
       if (lean) query = query.lean();
     }
     const data = await query;
