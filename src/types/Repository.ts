@@ -63,8 +63,8 @@ abstract class Repository<T> implements IRepository<T> {
       if (typeof populate === 'object') {
         for (const item of populate) query = query.populate(item);
       }
-      if(skip) query = query.skip(skip)
-      if(limit) query = query.limit(limit)
+      if (skip) query = query.skip(skip);
+      if (limit) query = query.limit(limit);
       if (lean) query = query.lean();
     }
     const data = await query;

@@ -1,4 +1,3 @@
-
 export interface QueryOptions {
   sort?: any;
   select?: string;
