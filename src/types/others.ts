@@ -1,3 +1,5 @@
+import {Model} from 'mongoose'
+
 export interface QueryOptions {
   sort?: any;
   select?: string;
@@ -24,4 +26,10 @@ export interface UpdateOptions {
   lean?: boolean;
   returnDocument?: 'before' | 'after';
   overwrite?: boolean;
+}
+
+export interface NameModelMap<T>{
+  name:string;
+  model: Model<T>
+  CustomModel: new(doc: any)=> any
 }

@@ -2,11 +2,22 @@ import IRepository from './IRepository';
 import { FilterQuery, UpdateQuery } from 'mongoose';
 import { UpdateResult, DeleteResult } from 'mongodb';
 import { PaginatedResult, QueryOptions, UpdateOptions } from './others';
+import Database from './Database';
+import Collection from './Collection';
+import Author, { IAuthor } from '../__test__/models/Author';
+import Book, { IBook } from '../__test__/models/Book';
 
 abstract class MockRepository<T> implements IRepository<T> {
-  constructor() {}
-  create(data: T | T[]): Promise<void | T | T[]> {
-    throw new Error('Method not implemented.');
+  protected database:Database
+  protected collection: Collection<T>
+
+  constructor(database: Database, modelName: string) {
+    this.database = database;
+    this.collection = database.getCollection(modelName)
+  }
+  
+  async create(data: T | T[]): Promise<void | T | T[]> {
+    this.collection.insertDocuments(data)
   }
   findById(id: string, options?: QueryOptions): Promise<T | null> {
     throw new Error('Method not implemented.');
@@ -50,3 +61,43 @@ abstract class MockRepository<T> implements IRepository<T> {
 }
 
 export default MockRepository;
+
+
+// const creatAuthor = <IAuthor>(MyModel: new(doc: any)=> IAuthor)=>{
+//   const obj = new MyModel({
+//     name: 'Osemudmane itua',
+//     age: 44
+//   })
+//   console.log(obj)
+// }
+
+// creatAuthor(Author)
+
+const database = new Database([
+  {
+    name: 'Author',
+    model: Author,
+    CustomModel: Author
+  },
+  {
+    name: 'Book',
+    model: Book,
+    CustomModel: Book
+  }
+])
+
+class MockAuthorRepository extends MockRepository<IAuthor>{
+  constructor(database: Database)
+  {
+    super(database,'Author')
+  }
+}
+
+const mockAuthorRepository = new MockAuthorRepository(database)
+
+mockAuthorRepository.create({
+  name: 'Osemudiamen Itua',
+  age: 45
+} as IAuthor)
+
+console.log(database.getCollection('Author').documents)
