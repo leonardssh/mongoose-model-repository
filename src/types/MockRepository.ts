@@ -1,5 +1,5 @@
 import IRepository from './IRepository';
-import { FilterQuery, UpdateQuery } from 'mongoose';
+import { FilterQuery, UpdateQuery, Document } from 'mongoose';
 import { UpdateResult, DeleteResult } from 'mongodb';
 import { PaginatedResult, QueryOptions, UpdateOptions } from './others';
 import Database from './Database';
@@ -7,17 +7,17 @@ import Collection from './Collection';
 import Author, { IAuthor } from '../__test__/models/Author';
 import Book, { IBook } from '../__test__/models/Book';
 
-abstract class MockRepository<T> implements IRepository<T> {
+abstract class MockRepository<T extends Document> implements IRepository<T> {
   protected database:Database
-  protected collection: Collection<T>
+  protected model: Collection<T>
 
   constructor(database: Database, modelName: string) {
     this.database = database;
-    this.collection = database.getCollection(modelName)
+    this.model = database.getCollection(modelName)
   }
   
   async create(data: T | T[]): Promise<void | T | T[]> {
-    this.collection.insertDocuments(data)
+    this.model.create(data)
   }
   findById(id: string, options?: QueryOptions): Promise<T | null> {
     throw new Error('Method not implemented.');
@@ -73,31 +73,29 @@ export default MockRepository;
 
 // creatAuthor(Author)
 
-const database = new Database([
-  {
-    name: 'Author',
-    model: Author,
-    CustomModel: Author
-  },
-  {
-    name: 'Book',
-    model: Book,
-    CustomModel: Book
-  }
-])
+// const database = new Database([
+//   {
+//     name: 'Author',
+//     model: Author,
+//     CustomModel: Author
+//   },
+//   {
+//     name: 'Book',
+//     model: Book,
+//     CustomModel: Book
+//   }
+// ])
 
-class MockAuthorRepository extends MockRepository<IAuthor>{
-  constructor(database: Database)
-  {
-    super(database,'Author')
-  }
-}
+// class MockAuthorRepository extends MockRepository<IAuthor>{
+//   constructor(database: Database)
+//   {
+//     super(database,'Author')
+//   }
+// }
 
-const mockAuthorRepository = new MockAuthorRepository(database)
+// const mockAuthorRepository = new MockAuthorRepository(database)
 
-mockAuthorRepository.create({
-  name: 'Osemudiamen Itua',
-  age: 45
-} as IAuthor)
-
-console.log(database.getCollection('Author').documents)
+// mockAuthorRepository.create({
+//   name: 'Osemudiamen Itua',
+//   age: 45
+// } as IAuthor)

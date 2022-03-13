@@ -3,12 +3,18 @@ import { NameModelMap } from "./others";
 import {Document, Model} from 'mongoose'
 
 class Database{
+    static instance: Database | null = null;
     private collections: Map<string,Collection<any>> = new Map
 
-    constructor( modelData : NameModelMap<any> | NameModelMap<any>[] = []){
-       this.registerModels(modelData)
+    private constructor( modelData : NameModelMap<any> | NameModelMap<any>[] = []){
     }
 
+    static getInstance():Database
+    {
+        if(!Database.instance) Database.instance = new Database
+        return Database.instance
+
+    }
     registerModels(modelData : NameModelMap<any> | NameModelMap<any>[]): boolean
     {
         if(Array.isArray(modelData))
@@ -33,4 +39,5 @@ class Database{
     }
 }
 
-export default Database
+const MockDatabase = Database.getInstance()
+export default MockDatabase
