@@ -144,8 +144,8 @@ abstract class Repository<T> implements IRepository<T> {
     const result = await this.model.findOneAndUpdate(filter, update, options);
     return result;
   }
-  async findByIdAndUpdate(filter: FilterQuery<T>, update: UpdateQuery<T>, options?: UpdateOptions): Promise<T | null> {
-    const result = await this.model.findByIdAndUpdate(filter, update, options);
+  async findByIdAndUpdate(id: string, update: UpdateQuery<T>, options?: UpdateOptions): Promise<T | null> {
+    const result = await this.model.findByIdAndUpdate(id,update,options);
     return result;
   }
 }

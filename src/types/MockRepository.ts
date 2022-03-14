@@ -25,8 +25,9 @@ abstract class MockRepository<T extends Document> implements IRepository<T> {
   findOne(filter: FilterQuery<T>, options?: QueryOptions): Promise<T | null> {
     throw new Error('Method not implemented.');
   }
-  find(filter: FilterQuery<T>, options?: QueryOptions): Promise<T[]> {
-    throw new Error('Method not implemented.');
+  async find(filter: FilterQuery<T>={}, options?: QueryOptions): Promise<T[]> {
+    const result = this.model.find()
+    return result;
   }
   countDocuments(filter: FilterQuery<T>): Promise<number> {
     throw new Error('Method not implemented.');
@@ -52,7 +53,7 @@ abstract class MockRepository<T extends Document> implements IRepository<T> {
   findOneAndUpdate(filter: FilterQuery<T>, update: UpdateQuery<T>, options?: UpdateOptions): Promise<T | null> {
     throw new Error('Method not implemented.');
   }
-  findByIdAndUpdate(filter: FilterQuery<T>, update: UpdateQuery<T>, options?: UpdateOptions): Promise<T | null> {
+  findByIdAndUpdate(id: string, update: UpdateQuery<T>, options?: UpdateOptions): Promise<T | null> {
     throw new Error('Method not implemented.');
   }
   findAndPaginate(filter: FilterQuery<T>, page: number, limit: number, sort: any): Promise<PaginatedResult<T>> {
@@ -62,39 +63,4 @@ abstract class MockRepository<T extends Document> implements IRepository<T> {
 
 export default MockRepository;
 
-// const creatAuthor = <IAuthor>(MyModel: new(doc: any)=> IAuthor)=>{
-//   const obj = new MyModel({
-//     name: 'Osemudmane itua',
-//     age: 44
-//   })
-//   console.log(obj)
-// }
 
-// creatAuthor(Author)
-
-// const database = new Database([
-//   {
-//     name: 'Author',
-//     model: Author,
-//     CustomModel: Author
-//   },
-//   {
-//     name: 'Book',
-//     model: Book,
-//     CustomModel: Book
-//   }
-// ])
-
-// class MockAuthorRepository extends MockRepository<IAuthor>{
-//   constructor(database: Database)
-//   {
-//     super(database,'Author')
-//   }
-// }
-
-// const mockAuthorRepository = new MockAuthorRepository(database)
-
-// mockAuthorRepository.create({
-//   name: 'Osemudiamen Itua',
-//   age: 45
-// } as IAuthor)

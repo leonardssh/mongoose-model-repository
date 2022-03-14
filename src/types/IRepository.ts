@@ -30,7 +30,7 @@ interface IRepository<T> {
   updateMany(filter: FilterQuery<T>, update: UpdateQuery<T>): Promise<UpdateResult>;
   updateOne(filter: FilterQuery<T>, update: UpdateQuery<T>): Promise<UpdateResult>;
   findOneAndUpdate(filter: FilterQuery<T>, update: UpdateQuery<T>, options?: UpdateOptions): Promise<T | null>;
-  findByIdAndUpdate(filter: FilterQuery<T>, update: UpdateQuery<T>, options?: UpdateOptions): Promise<T | null>;
+  findByIdAndUpdate(id:string, update: UpdateQuery<T>, options?: UpdateOptions): Promise<T | null>;
 }
 
 export default IRepository;
