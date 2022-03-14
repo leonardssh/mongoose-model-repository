@@ -2,27 +2,27 @@ import IRepository from './IRepository';
 import { FilterQuery, UpdateQuery, Document } from 'mongoose';
 import { UpdateResult, DeleteResult } from 'mongodb';
 import { PaginatedResult, QueryOptions, UpdateOptions } from './others';
-import Database from './Database';
+import {Database} from './Database';
 import Collection from './Collection';
 import Author, { IAuthor } from '../__test__/models/Author';
 import Book, { IBook } from '../__test__/models/Book';
 
 abstract class MockRepository<T extends Document> implements IRepository<T> {
-  protected database:Database
-  protected model: Collection<T>
+  protected database: Database;
+  protected model: Collection<T>;
 
   constructor(database: Database, modelName: string) {
     this.database = database;
-    this.model = database.getCollection(modelName)
+    this.model = database.getCollection(modelName);
   }
-  
+
   async create(data: T | T[]): Promise<void | T | T[]> {
-    this.model.create(data)
+    this.model.create(data);
   }
   findById(id: string, options?: QueryOptions): Promise<T | null> {
     throw new Error('Method not implemented.');
   }
-  findOne(filter: FilterQuery<T>, option?: QueryOptions): Promise<T | null> {
+  findOne(filter: FilterQuery<T>, options?: QueryOptions): Promise<T | null> {
     throw new Error('Method not implemented.');
   }
   find(filter: FilterQuery<T>, options?: QueryOptions): Promise<T[]> {
@@ -61,7 +61,6 @@ abstract class MockRepository<T extends Document> implements IRepository<T> {
 }
 
 export default MockRepository;
-
 
 // const creatAuthor = <IAuthor>(MyModel: new(doc: any)=> IAuthor)=>{
 //   const obj = new MyModel({

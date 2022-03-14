@@ -1,4 +1,4 @@
-import {Model} from 'mongoose'
+import { Model } from 'mongoose';
 
 export interface QueryOptions {
   sort?: any;
@@ -28,8 +28,8 @@ export interface UpdateOptions {
   overwrite?: boolean;
 }
 
-export interface NameModelMap<T>{
-  name:string;
-  model: Model<T>
-  CustomModel: new(doc: any)=> any
+export interface NameModelMap<T> {
+  name: string;
+  model: Model<T>;
+  CustomModel: new (doc: any) => any;
 }
