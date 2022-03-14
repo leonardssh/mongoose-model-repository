@@ -1,6 +1,6 @@
 import { Model, FilterQuery, Document, UpdateQuery } from 'mongoose';
-import {UpdateResult, DeleteResult} from 'mongodb'
-import {UpdateOptions, QueryOptions} from './others'
+import { UpdateResult, DeleteResult } from 'mongodb';
+import { UpdateOptions, QueryOptions } from './others';
 
 class Collection<T extends Document> {
   protected name: string;
@@ -8,7 +8,7 @@ class Collection<T extends Document> {
   protected MyModel: new (doc: any) => any;
   protected documents: T[] = [];
   protected idMap: Map<string, T> = new Map();
-  protected deselectedFields:string[] = [];
+  protected deselectedFields: string[] = [];
   protected documentMiddlewares: ((doc: T) => T)[] = []; //array of document middleware in the order it shold be processed
   protected queryMiddleware: ((query: FilterQuery<T>) => FilterQuery<T>)[] = []; // query middleare in order
 
@@ -51,52 +51,43 @@ class Collection<T extends Document> {
     /**
      * For documents where createdat and updatedAt are specified, it adds these fields to the documents.
      */
-    const timeStampsDesc: any= (this.model.schema as any)['$timestamps'];
-    if(timeStampsDesc)
-    {
-      let field:any = timeStampsDesc['createdAt'];
-      (doc as any)[field] = new Date()
+    const timeStampsDesc: any = (this.model.schema as any)['$timestamps'];
+    if (timeStampsDesc) {
+      let field: any = timeStampsDesc['createdAt'];
+      (doc as any)[field] = new Date();
       field = timeStampsDesc['updatedAt'];
-      (doc as any)[field] = new Date()
+      (doc as any)[field] = new Date();
     }
     return doc;
   }
 
-  private handleRequiredError(schemaDesc:any, field:string ,doc:T):void
-  {
+  private handleRequiredError(schemaDesc: any, field: string, doc: T): void {
     //Throws error when required field is not in the document.
     const reqDesc = (schemaDesc as any)[field]['required'];
-    if(reqDesc)
-    {
+    if (reqDesc) {
       let required = false;
-      let message:string | null = null;
-      if(Array.isArray(reqDesc) && reqDesc.length==2)
-      {
+      let message: string | null = null;
+      if (Array.isArray(reqDesc) && reqDesc.length == 2) {
         required = reqDesc[0];
         message = reqDesc[1];
-      }
-      else
-      {
+      } else {
         required = reqDesc;
       }
 
       //if the field is required and the field is not specified in doc
-      if(required && !(doc as any)[field])
-      {
-        if(!message) message = `${field} is required`;
-        throw new Error(message)
+      if (required && !(doc as any)[field]) {
+        if (!message) message = `${field} is required`;
+        throw new Error(message);
       }
     }
   }
 
-  private checkTypeError(schemaDesc:any, field:string ,doc:T):void
-  {
+  private checkTypeError(schemaDesc: any, field: string, doc: T): void {
     //it should validate that all fields are of the right type
     const typeDesc = (schemaDesc as any)[field]['type'];
-      if((doc as any)[field])
-      {
-        typeDesc((doc as any)[field]);
-      }
+    if ((doc as any)[field]) {
+      typeDesc((doc as any)[field]);
+    }
   }
 
   private validateBeforeSave(doc: T) {
@@ -104,26 +95,24 @@ class Collection<T extends Document> {
      * It should validate all fields in an document based on the imput schena.
      */
     const vbs = (this.model.schema as any)['options']['validateBeforeSave'];
-    const schemaDesc = this.model.schema.obj
+    const schemaDesc = this.model.schema.obj;
     if (vbs === true) {
-      for(const field in schemaDesc)
-      {
+      for (const field in schemaDesc) {
         //check if the field is required and is specified
-        this.handleRequiredError(schemaDesc,field,doc)
-        
+        this.handleRequiredError(schemaDesc, field, doc);
+
         //handle invalid type error
-        this.checkTypeError(schemaDesc,field,doc)
+        this.checkTypeError(schemaDesc, field, doc);
       }
     }
     return doc;
   }
 
-  private appplySelectFilter(doc: T,select:string)
-  {
-      /**
-       * It should select only the required fields.
-       */
-      return doc
+  private appplySelectFilter(doc: T, select: string) {
+    /**
+     * It should select only the required fields.
+     */
+    return doc;
   }
 
   //adds defaults and applies presave middlware.
@@ -141,7 +130,7 @@ class Collection<T extends Document> {
     }
     let newDoc = this.addDefaults(result);
     newDoc = this.addTimestamps(newDoc);
-    newDoc = this.validateBeforeSave(newDoc)
+    newDoc = this.validateBeforeSave(newDoc);
     return newDoc;
   }
 
@@ -170,7 +159,7 @@ class Collection<T extends Document> {
     return isMatch;
   }
 
-  create(data: T | T[]): T|T[]{
+  create(data: T | T[]): T | T[] {
     const result = this.createDoc(data);
     if (Array.isArray(result)) {
       this.documents = this.documents.concat(result);
@@ -191,96 +180,78 @@ class Collection<T extends Document> {
   }
 
   findOne(filter: FilterQuery<T>, options?: QueryOptions): T | null {
-    if (Object.keys(filter).includes('_id'))
-        return this.findById(filter._id.toString(), options)
+    if (Object.keys(filter).includes('_id')) return this.findById(filter._id.toString(), options);
 
-    for(const doc of this.documents)
-    {
-        if(this.checkMatch(filter,doc))
-            return doc
+    for (const doc of this.documents) {
+      if (this.checkMatch(filter, doc)) return doc;
     }
-    return null
+    return null;
   }
 
-  find(filter: FilterQuery<T>={}, options?: QueryOptions): T[] {
-    if (Object.keys(filter).includes('_id'))
-    {
-        const res:T[] = [];
-        const doc = this.findById(filter._id.toString(), options)
-        if(doc)
-            res.push(doc)
-        return res;
+  find(filter: FilterQuery<T> = {}, options?: QueryOptions): T[] {
+    if (Object.keys(filter).includes('_id')) {
+      const res: T[] = [];
+      const doc = this.findById(filter._id.toString(), options);
+      if (doc) res.push(doc);
+      return res;
     }
 
-    const res: T[] = []
-    for(const doc of this.documents)
-    {
-        if(this.checkMatch(filter,doc))
-        {
-            res.push(doc)
-        }
+    const res: T[] = [];
+    for (const doc of this.documents) {
+      if (this.checkMatch(filter, doc)) {
+        res.push(doc);
+      }
     }
-    return res
-
+    return res;
   }
 
   countDocuments(filter: FilterQuery<T>): number {
-    if (Object.keys(filter).includes('_id'))
-    {
-        const res:T[] = [];
-        const doc = this.findById(filter._id.toString())
-        if(doc)
-            res.push(doc)
-        return res.length
+    if (Object.keys(filter).includes('_id')) {
+      const res: T[] = [];
+      const doc = this.findById(filter._id.toString());
+      if (doc) res.push(doc);
+      return res.length;
     }
 
-    const res: T[] = []
-    for(const doc of this.documents)
-    {
-        if(this.checkMatch(filter,doc))
-        {
-            res.push(doc)
-        }
+    const res: T[] = [];
+    for (const doc of this.documents) {
+      if (this.checkMatch(filter, doc)) {
+        res.push(doc);
+      }
     }
-    return res.length
+    return res.length;
   }
 
   findByIdAndDelete(id: string): T | null {
     const doc = this.findById(id);
-    if(!doc)
-        return null;
-    
-    const n = this.documents.length
-    for(let i=0; i<n; i++)
-    {
-        const document = this.documents[i]
-        if(doc===document)
-        {
-            this.idMap.delete(id)
-            this.documents.splice(i,1)
-            break;
-        }
+    if (!doc) return null;
+
+    const n = this.documents.length;
+    for (let i = 0; i < n; i++) {
+      const document = this.documents[i];
+      if (doc === document) {
+        this.idMap.delete(id);
+        this.documents.splice(i, 1);
+        break;
+      }
     }
 
     return doc;
   }
 
   findOneAndDelete(filter: FilterQuery<T>): T | null {
-    const doc = this.findOne(filter)
-    if(!doc)
-        return null;
-    const n = this.documents.length
-    for(let i=0; i<n; i++)
-    {
-        const document = this.documents[i]
-        if(doc===document)
-        {
-            this.idMap.delete(doc._id.toString())
-            this.documents.splice(i,1)
-            break;
-        }
+    const doc = this.findOne(filter);
+    if (!doc) return null;
+    const n = this.documents.length;
+    for (let i = 0; i < n; i++) {
+      const document = this.documents[i];
+      if (doc === document) {
+        this.idMap.delete(doc._id.toString());
+        this.documents.splice(i, 1);
+        break;
+      }
     }
-    return doc
+    return doc;
   }
   deleteOne(filter: FilterQuery<T>): Promise<DeleteResult> {
     throw new Error('Method not implemented.');
@@ -307,51 +278,41 @@ class Collection<T extends Document> {
     throw new Error('Method not implemented.');
   }
   findOneAndUpdate(filter: FilterQuery<T>, update: UpdateQuery<T>, options?: UpdateOptions): T | null {
-    const doc = this.findOne(filter)
-    if(!doc)
-        return null;
-    const n = this.documents.length
-    let before:T|null = null;
-    let after:T|null = null
-    for(let i=0; i<n; i++)
-    {
-        const document = this.documents[i]
-        if(doc===document)
-        {
-          before = {...doc}
-          for(const key in update)
-          {
-            if((doc as any)[key]!==update[key])
-            {
-              (this.documents[i] as any)[key] = update[key];
-            }
+    const doc = this.findOne(filter);
+    if (!doc) return null;
+    const n = this.documents.length;
+    let before: T | null = null;
+    let after: T | null = null;
+    for (let i = 0; i < n; i++) {
+      const document = this.documents[i];
+      if (doc === document) {
+        before = { ...doc };
+        for (const key in update) {
+          if ((doc as any)[key] !== update[key]) {
+            (this.documents[i] as any)[key] = update[key];
           }
-          after = this.documents[i];
-          break;
         }
+        after = this.documents[i];
+        break;
+      }
     }
-    return doc
+    return doc;
   }
 
-  findByIdAndUpdate(id: string , update: UpdateQuery<T>, options?: UpdateOptions): T | null {
+  findByIdAndUpdate(id: string, update: UpdateQuery<T>, options?: UpdateOptions): T | null {
     const doc = this.findById(id);
-    if(!doc)
-        return null;
-    
-    const n = this.documents.length
-    for(let i=0; i<n; i++)
-    {
-        const document = this.documents[i]
-        if(doc===document)
-        {
-          for(const key in update)
-          {
-            if((doc as any)[key]!==update[key])
-            {
-              (this.documents[i] as any)[key] = update[key];
-            }
+    if (!doc) return null;
+
+    const n = this.documents.length;
+    for (let i = 0; i < n; i++) {
+      const document = this.documents[i];
+      if (doc === document) {
+        for (const key in update) {
+          if ((doc as any)[key] !== update[key]) {
+            (this.documents[i] as any)[key] = update[key];
           }
         }
+      }
     }
 
     return doc;

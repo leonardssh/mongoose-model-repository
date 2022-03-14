@@ -30,6 +30,6 @@ class Database {
   }
 }
 
-export {Database}
+export { Database };
 const MockDatabase = Database.getInstance();
 export default MockDatabase;

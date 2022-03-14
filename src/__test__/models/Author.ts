@@ -5,17 +5,19 @@ export interface IAuthor extends Document {
   age: number;
 }
 
-const authorSchema = new Schema<IAuthor>({
-  name: {
-    type: String,
-    required: [true,'The name of the author is quite required']
+const authorSchema = new Schema<IAuthor>(
+  {
+    name: {
+      type: String,
+      required: [true, 'The name of the author is quite required'],
+    },
+    age: {
+      type: Number,
+      default: 100,
+    },
   },
-  age: {
-    type: Number,
-    default: 100
-  },
-},
-{timestamps: true});
+  { timestamps: true }
+);
 
 const Author = model<IAuthor>('Author', authorSchema);
 export default Author;

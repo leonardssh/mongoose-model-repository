@@ -2,7 +2,7 @@ import IRepository from './IRepository';
 import { FilterQuery, UpdateQuery, Document } from 'mongoose';
 import { UpdateResult, DeleteResult } from 'mongodb';
 import { PaginatedResult, QueryOptions, UpdateOptions } from './others';
-import {Database} from './Database';
+import { Database } from './Database';
 import Collection from './Collection';
 import Author, { IAuthor } from '../__test__/models/Author';
 import Book, { IBook } from '../__test__/models/Book';
@@ -25,8 +25,8 @@ abstract class MockRepository<T extends Document> implements IRepository<T> {
   findOne(filter: FilterQuery<T>, options?: QueryOptions): Promise<T | null> {
     throw new Error('Method not implemented.');
   }
-  async find(filter: FilterQuery<T>={}, options?: QueryOptions): Promise<T[]> {
-    const result = this.model.find()
+  async find(filter: FilterQuery<T> = {}, options?: QueryOptions): Promise<T[]> {
+    const result = this.model.find();
     return result;
   }
   countDocuments(filter: FilterQuery<T>): Promise<number> {
@@ -62,5 +62,3 @@ abstract class MockRepository<T extends Document> implements IRepository<T> {
 }
 
 export default MockRepository;
-
-
