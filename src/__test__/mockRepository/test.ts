@@ -1,5 +1,6 @@
 import MockDatabase from '../../types/Database';
 import MockRepository from '../../types/MockRepository';
+import connectToMongoDB from '../connectToMongoDB';
 import Author, { IAuthor } from '../models/Author';
 import Book, { IBook } from '../models/Book';
 
@@ -19,14 +20,30 @@ MockDatabase.registerModels([
 class AuthorRepository extends MockRepository<IAuthor> {}
 
 const authorRepository = new AuthorRepository(MockDatabase, 'Author');
-authorRepository.create({
-  name: 'Osemudiamen itua',
-  age: 'Itua Ose',
-} as any);
+
 
 async function stuff() {
-  const result = await authorRepository.find();
-  console.log(result);
+    try {
+        const doc = await authorRepository.create({
+            name: 'Osemudiamen itua',
+            age: 45,
+          } as IAuthor) as IAuthor;
+
+          let result = await authorRepository.find();
+          console.log('first',result)
+
+          doc.name = "Fash Joba";
+          await doc.save()
+          result = await authorRepository.find();
+          console.log('second',result);
+
+  
+    } catch (error) {
+        console.log(error)
+    }
+  
 }
 
 stuff();
+
+

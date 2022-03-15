@@ -1,6 +1,8 @@
 import { Model, FilterQuery, Document, UpdateQuery } from 'mongoose';
 import { UpdateResult, DeleteResult } from 'mongodb';
-import { UpdateOptions, QueryOptions } from './others';
+import { UpdateOptions, QueryOptions, QueryOptionsExtended } from './others';
+import {stub} from 'sinon'
+
 
 class Collection<T extends Document> {
   protected name: string;
@@ -8,7 +10,6 @@ class Collection<T extends Document> {
   protected MyModel: new (doc: any) => any;
   protected documents: T[] = [];
   protected idMap: Map<string, T> = new Map();
-  protected deselectedFields: string[] = [];
   protected documentMiddlewares: ((doc: T) => T)[] = []; //array of document middleware in the order it shold be processed
   protected queryMiddleware: ((query: FilterQuery<T>) => FilterQuery<T>)[] = []; // query middleare in order
 
@@ -16,6 +17,8 @@ class Collection<T extends Document> {
     this.name = name;
     this.model = model;
     this.MyModel = MyModel;
+
+    
   }
 
   private addDefaults(doc: T): T {
@@ -33,19 +36,19 @@ class Collection<T extends Document> {
     return doc;
   }
 
-  addDocumentMiddleware(type: string, middleware: (doc: T) => T) {
-    /**
-     * Should receive a middleware function from the user
-     */
-    throw new Error('Not implemented yer');
-  }
+  // addDocumentMiddleware(type: string, middleware: (doc: T) => T) {
+  //   /**
+  //    * Should receive a middleware function from the user
+  //    */
+  //   throw new Error('Not implemented yer');
+  // }
 
-  addQueryMiddleware(type: string, middleware: (query: FilterQuery<T>) => FilterQuery<T>) {
-    /**
-     * Should receive a middleware function from the user
-     */
-    throw new Error('Not implemented yer');
-  }
+  // addQueryMiddleware(type: string, middleware: (query: FilterQuery<T>) => FilterQuery<T>) {
+  //   /**
+  //    * Should receive a middleware function from the user
+  //    */
+  //   throw new Error('Not implemented yer');
+  // }
 
   private addTimestamps(doc: T): T {
     /**
@@ -61,49 +64,22 @@ class Collection<T extends Document> {
     return doc;
   }
 
-  private handleRequiredError(schemaDesc: any, field: string, doc: T): void {
-    //Throws error when required field is not in the document.
-    const reqDesc = (schemaDesc as any)[field]['required'];
-    if (reqDesc) {
-      let required = false;
-      let message: string | null = null;
-      if (Array.isArray(reqDesc) && reqDesc.length == 2) {
-        required = reqDesc[0];
-        message = reqDesc[1];
-      } else {
-        required = reqDesc;
-      }
 
-      //if the field is required and the field is not specified in doc
-      if (required && !(doc as any)[field]) {
-        if (!message) message = `${field} is required`;
-        throw new Error(message);
-      }
-    }
-  }
-
-  private checkTypeError(schemaDesc: any, field: string, doc: T): void {
-    //it should validate that all fields are of the right type
-    const typeDesc = (schemaDesc as any)[field]['type'];
-    if ((doc as any)[field]) {
-      typeDesc((doc as any)[field]);
-    }
-  }
-
-  private validateBeforeSave(doc: T) {
+   private async validateBeforeSave(doc: T) {
     /**
      * It should validate all fields in an document based on the imput schena.
      */
     const vbs = (this.model.schema as any)['options']['validateBeforeSave'];
     const schemaDesc = this.model.schema.obj;
     if (vbs === true) {
-      for (const field in schemaDesc) {
-        //check if the field is required and is specified
-        this.handleRequiredError(schemaDesc, field, doc);
+      // for (const field in schemaDesc) {
+      //   //check if the field is required and is specified
+      //   this.handleRequiredError(schemaDesc, field, doc);
 
-        //handle invalid type error
-        this.checkTypeError(schemaDesc, field, doc);
-      }
+      //   //handle invalid type error
+      //   this.checkTypeError(schemaDesc, field, doc);
+      // }
+       await doc.validate()
     }
     return doc;
   }
@@ -115,8 +91,22 @@ class Collection<T extends Document> {
     return doc;
   }
 
+  // private async saveDoc(doc:T):Promise<T>{
+  //   console.log('document to be saved = ',doc)
+  //   if(!this.idMap.get(doc._id.toString()))
+  //   {
+  //     console.log('I actuallly entered inside here')
+  //     const newDoc = await this.create(doc)
+  //     return newDoc as T;
+  //   }
+  //   this.findByIdAndUpdate(doc._id.toString(),doc as unknown as UpdateQuery<T>)
+  //   const d = this.findById(doc._id.toString());
+  //   console.log('updated = ',d)
+  //   return {...doc};
+  // }
+
   //adds defaults and applies presave middlware.
-  private createDoc(data: T | T[]): T | T[] {
+  private async createDoc(data: T | T[]): Promise<T | T[]> {
     const result = new this.MyModel(data);
     if (Array.isArray(result)) {
       const updatedResult: T[] = [];
@@ -130,7 +120,10 @@ class Collection<T extends Document> {
     }
     let newDoc = this.addDefaults(result);
     newDoc = this.addTimestamps(newDoc);
-    newDoc = this.validateBeforeSave(newDoc);
+    newDoc = await this.validateBeforeSave(newDoc);
+    const stub1 = stub(newDoc,'save').callsFake(async() =>{
+      console.log('doc properties =' ,newDoc)
+    })
     return newDoc;
   }
 
@@ -159,8 +152,8 @@ class Collection<T extends Document> {
     return isMatch;
   }
 
-  create(data: T | T[]): T | T[] {
-    const result = this.createDoc(data);
+  async create(data: T | T[]): Promise<T | T[]> {
+    const result = await this.createDoc(data);
     if (Array.isArray(result)) {
       this.documents = this.documents.concat(result);
       for (const doc of result) {
@@ -170,29 +163,29 @@ class Collection<T extends Document> {
       this.documents.push(result);
       this.idMap.set(result._id.toString(), result);
     }
-    return result;
+    return {...result};
   }
 
   findById(id: string, options?: QueryOptions): T | null {
     const doc = this.idMap.get(id) || null;
     if (!doc) return null;
-    return doc;
+    return {...doc};
   }
 
   findOne(filter: FilterQuery<T>, options?: QueryOptions): T | null {
     if (Object.keys(filter).includes('_id')) return this.findById(filter._id.toString(), options);
 
     for (const doc of this.documents) {
-      if (this.checkMatch(filter, doc)) return doc;
+      if (this.checkMatch(filter, doc)) return {...doc};
     }
     return null;
   }
 
-  find(filter: FilterQuery<T> = {}, options?: QueryOptions): T[] {
+  find(filter: FilterQuery<T> = {}, options?: QueryOptionsExtended): T[] {
     if (Object.keys(filter).includes('_id')) {
       const res: T[] = [];
       const doc = this.findById(filter._id.toString(), options);
-      if (doc) res.push(doc);
+      if (doc) res.push({...doc});
       return res;
     }
 
@@ -236,7 +229,7 @@ class Collection<T extends Document> {
       }
     }
 
-    return doc;
+    return {...doc};
   }
 
   findOneAndDelete(filter: FilterQuery<T>): T | null {
@@ -296,11 +289,12 @@ class Collection<T extends Document> {
         break;
       }
     }
-    return doc;
+    return {...doc};
   }
 
   findByIdAndUpdate(id: string, update: UpdateQuery<T>, options?: UpdateOptions): T | null {
     const doc = this.findById(id);
+    console.log('found',doc)
     if (!doc) return null;
 
     const n = this.documents.length;
@@ -315,7 +309,7 @@ class Collection<T extends Document> {
       }
     }
 
-    return doc;
+    return {...doc};
   }
 }
 
