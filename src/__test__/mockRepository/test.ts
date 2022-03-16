@@ -29,12 +29,11 @@ async function stuff() {
             age: 45,
           } as IAuthor) as IAuthor;
 
-          let result = await authorRepository.find();
-          console.log('first',result)
-
-          doc.name = "Fash Joba";
-          await doc.save()
-          result = await authorRepository.find();
+          console.log(doc._id.toString())
+          const d = await authorRepository.findOne({_id:doc._id.toString()});
+          console.log(d)
+          await authorRepository.findByIdAndUpdate(doc._id.toString(),{name: "Fash Joba"});
+          let result = await authorRepository.find()
           console.log('second',result);
 
   
@@ -43,6 +42,7 @@ async function stuff() {
     }
   
 }
+
 
 stuff();
 

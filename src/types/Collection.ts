@@ -1,8 +1,11 @@
 import { Model, FilterQuery, Document, UpdateQuery } from 'mongoose';
 import { UpdateResult, DeleteResult } from 'mongodb';
 import { UpdateOptions, QueryOptions, QueryOptionsExtended } from './others';
-import {stub} from 'sinon'
 
+function copy(object:any)
+{
+  return JSON.parse(JSON.stringify(object))
+}
 
 class Collection<T extends Document> {
   protected name: string;
@@ -70,25 +73,105 @@ class Collection<T extends Document> {
      * It should validate all fields in an document based on the imput schena.
      */
     const vbs = (this.model.schema as any)['options']['validateBeforeSave'];
-    const schemaDesc = this.model.schema.obj;
     if (vbs === true) {
-      // for (const field in schemaDesc) {
-      //   //check if the field is required and is specified
-      //   this.handleRequiredError(schemaDesc, field, doc);
-
-      //   //handle invalid type error
-      //   this.checkTypeError(schemaDesc, field, doc);
-      // }
        await doc.validate()
     }
     return doc;
   }
 
-  private appplySelectFilter(doc: T, select: string) {
+  private appplySelectFilter(doc: T, select?: string| undefined) {
     /**
      * It should select only the required fields.
      */
-    return doc;
+     const schemaDesc = this.model.schema.obj;
+
+    if(select)
+    {
+      let fields1 = select.split(' ');
+      let only = true;
+      const toBeAdded:string[] = []
+      const onlyFields:string[] = []
+      const toBeRemoved:string[] =[]
+      
+      //get all fields to deternmine whethere we are returning only specific fields(only)
+      //or if we are removing and adding certain fields 
+      for(const field of fields1)
+      {
+        if(field.length>0)
+        {
+          if(field[0]==='+' || field[0]==='-'){
+            only = false;
+            if(field[0]==='+')toBeAdded.push(field.substring(1))
+            else if(field[0]==='-')toBeRemoved.push(field.substring(1))
+          } 
+          else
+          {
+            onlyFields.push(field);
+          }
+        }
+      }
+
+      
+      if(only)
+      {
+        //add only the requested fields to newDoc
+        const newDoc:T = {_id: doc._id} as T
+        for(const field of onlyFields)
+        {
+          (newDoc as any)[field] = (doc as any)[field]
+        }
+        return newDoc;
+      }
+      else
+      {
+        //add all fields and add the ones requested by the user and remocve those 
+        const newDoc = copy(doc)
+        //remove all which are specified as select:false
+        for(const field in schemaDesc)
+        {
+          if((schemaDesc[field] as any).select && (schemaDesc[field] as any).select===false)
+          {
+            delete newDoc[field]
+          }
+        }
+
+        //add all fields that should be added
+        for(const field of toBeAdded)
+        {
+          if(!newDoc[field])
+          {
+            newDoc[field] = (doc as any)[field]
+          }
+        }
+
+        //remove all fields to be removed
+        for(const field of toBeRemoved)
+        {
+          if(newDoc[field])
+          {
+            delete newDoc[field]
+          }
+        }
+
+        return newDoc;
+      }
+      
+    }
+
+
+    //if no select string is set just find the default select specified in the schema
+    const newDoc = copy(doc)
+    //remove all which are specified as false
+    for(const field in schemaDesc)
+    {
+      if((schemaDesc[field] as any).select && (schemaDesc[field] as any).select===false)
+      {
+        delete newDoc[field]
+      }
+    }
+
+    
+    return newDoc;
   }
 
   // private async saveDoc(doc:T):Promise<T>{
@@ -121,9 +204,6 @@ class Collection<T extends Document> {
     let newDoc = this.addDefaults(result);
     newDoc = this.addTimestamps(newDoc);
     newDoc = await this.validateBeforeSave(newDoc);
-    const stub1 = stub(newDoc,'save').callsFake(async() =>{
-      console.log('doc properties =' ,newDoc)
-    })
     return newDoc;
   }
 
@@ -163,20 +243,20 @@ class Collection<T extends Document> {
       this.documents.push(result);
       this.idMap.set(result._id.toString(), result);
     }
-    return {...result};
+    return copy(result);
   }
 
   findById(id: string, options?: QueryOptions): T | null {
     const doc = this.idMap.get(id) || null;
     if (!doc) return null;
-    return {...doc};
+    return copy(doc);
   }
 
   findOne(filter: FilterQuery<T>, options?: QueryOptions): T | null {
     if (Object.keys(filter).includes('_id')) return this.findById(filter._id.toString(), options);
 
     for (const doc of this.documents) {
-      if (this.checkMatch(filter, doc)) return {...doc};
+      if (this.checkMatch(filter, doc)) return copy(doc);
     }
     return null;
   }
@@ -185,14 +265,14 @@ class Collection<T extends Document> {
     if (Object.keys(filter).includes('_id')) {
       const res: T[] = [];
       const doc = this.findById(filter._id.toString(), options);
-      if (doc) res.push({...doc});
+      if (doc) res.push(copy(doc));
       return res;
     }
 
     const res: T[] = [];
     for (const doc of this.documents) {
       if (this.checkMatch(filter, doc)) {
-        res.push(doc);
+        res.push(copy(doc));
       }
     }
     return res;
@@ -222,14 +302,14 @@ class Collection<T extends Document> {
     const n = this.documents.length;
     for (let i = 0; i < n; i++) {
       const document = this.documents[i];
-      if (doc === document) {
+      if (doc._id.toString() === document._id.toString()) {
         this.idMap.delete(id);
         this.documents.splice(i, 1);
         break;
       }
     }
 
-    return {...doc};
+    return copy(doc);
   }
 
   findOneAndDelete(filter: FilterQuery<T>): T | null {
@@ -238,7 +318,7 @@ class Collection<T extends Document> {
     const n = this.documents.length;
     for (let i = 0; i < n; i++) {
       const document = this.documents[i];
-      if (doc === document) {
+      if (doc._id.toString() === document._id.toString()) {
         this.idMap.delete(doc._id.toString());
         this.documents.splice(i, 1);
         break;
@@ -278,8 +358,8 @@ class Collection<T extends Document> {
     let after: T | null = null;
     for (let i = 0; i < n; i++) {
       const document = this.documents[i];
-      if (doc === document) {
-        before = { ...doc };
+      if (doc._id.toString()=== document._id.toString()) {
+        before = copy(doc);
         for (const key in update) {
           if ((doc as any)[key] !== update[key]) {
             (this.documents[i] as any)[key] = update[key];
@@ -289,7 +369,7 @@ class Collection<T extends Document> {
         break;
       }
     }
-    return {...doc};
+    return copy(doc);
   }
 
   findByIdAndUpdate(id: string, update: UpdateQuery<T>, options?: UpdateOptions): T | null {
@@ -300,7 +380,7 @@ class Collection<T extends Document> {
     const n = this.documents.length;
     for (let i = 0; i < n; i++) {
       const document = this.documents[i];
-      if (doc === document) {
+      if (doc._id.toString() === document._id.toString()) {
         for (const key in update) {
           if ((doc as any)[key] !== update[key]) {
             (this.documents[i] as any)[key] = update[key];
@@ -309,7 +389,7 @@ class Collection<T extends Document> {
       }
     }
 
-    return {...doc};
+    return copy(doc);
   }
 }
 
