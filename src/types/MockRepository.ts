@@ -21,27 +21,27 @@ abstract class MockRepository<T extends Document> implements IRepository<T> {
     return doc;
   }
   async findById(id: string, options?: QueryOptions): Promise<T | null> {
-    const doc =  this.model.findById(id,options);
+    const doc = this.model.findById(id, options);
     return doc;
   }
   async findOne(filter: FilterQuery<T>, options?: QueryOptions): Promise<T | null> {
-    const doc =  this.model.findOne(filter,options)
+    const doc = this.model.findOne(filter, options);
     return doc;
   }
   async find(filter: FilterQuery<T> = {}, options?: QueryOptionsExtended): Promise<T[]> {
-    const result = this.model.find(filter,options);
+    const result = this.model.find(filter, options);
     return result;
   }
   async countDocuments(filter: FilterQuery<T>): Promise<number> {
-    const count = this.model.countDocuments(filter)
+    const count = this.model.countDocuments(filter);
     return count;
   }
   async findByIdAndDelete(id: string): Promise<T | null> {
-    const doc = await this.model.findByIdAndDelete(id)
+    const doc = await this.model.findByIdAndDelete(id);
     return doc;
   }
   async findOneAndDelete(filter: FilterQuery<T>): Promise<T | null> {
-    const doc = this.model.findOneAndDelete(filter)
+    const doc = this.model.findOneAndDelete(filter);
     return doc;
   }
   deleteOne(filter: FilterQuery<T>): Promise<DeleteResult> {
@@ -57,15 +57,20 @@ abstract class MockRepository<T extends Document> implements IRepository<T> {
     throw new Error('Method not implemented.');
   }
   async findOneAndUpdate(filter: FilterQuery<T>, update: UpdateQuery<T>, options?: UpdateOptions): Promise<T | null> {
-    const doc = this.model.findOneAndUpdate(filter,update,options);
+    const doc = this.model.findOneAndUpdate(filter, update, options);
     return doc;
   }
   async findByIdAndUpdate(id: string, update: UpdateQuery<T>, options?: UpdateOptions): Promise<T | null> {
-    const doc = this.model.findByIdAndUpdate(id,update,options);
+    const doc = this.model.findByIdAndUpdate(id, update, options);
     return doc;
   }
-  async findAndPaginate(filter: FilterQuery<T>, page: number, limit: number, options?: QueryOptions): Promise<PaginatedResult<T>> {
-    const allDocs =  this.model.find(filter,{skip: limit*(page-1), limit})
+  async findAndPaginate(
+    filter: FilterQuery<T>,
+    page: number,
+    limit: number,
+    options?: QueryOptions
+  ): Promise<PaginatedResult<T>> {
+    const allDocs = this.model.find(filter, { skip: limit * (page - 1), limit });
     const totalDocuments = await this.model.countDocuments(filter);
     const totalPages = Math.ceil(totalDocuments / limit);
     const currentPage = page;
@@ -80,7 +85,6 @@ abstract class MockRepository<T extends Document> implements IRepository<T> {
       prevPage,
       data: allDocs,
     };
-
   }
 }
 

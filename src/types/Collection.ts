@@ -2,9 +2,8 @@ import { Model, FilterQuery, Document, UpdateQuery } from 'mongoose';
 import { UpdateResult, DeleteResult } from 'mongodb';
 import { UpdateOptions, QueryOptions, QueryOptionsExtended } from './others';
 
-function copy(object:any)
-{
-  return JSON.parse(JSON.stringify(object))
+function copy(object: any) {
+  return JSON.parse(JSON.stringify(object));
 }
 
 class Collection<T extends Document> {
@@ -20,8 +19,6 @@ class Collection<T extends Document> {
     this.name = name;
     this.model = model;
     this.MyModel = MyModel;
-
-    
   }
 
   private addDefaults(doc: T): T {
@@ -67,110 +64,90 @@ class Collection<T extends Document> {
     return doc;
   }
 
-
-   private async validateBeforeSave(doc: T) {
+  private async validateBeforeSave(doc: T) {
     /**
      * It should validate all fields in an document based on the imput schena.
      */
     const vbs = (this.model.schema as any)['options']['validateBeforeSave'];
     if (vbs === true) {
-       await doc.validate()
+      await doc.validate();
     }
     return doc;
   }
 
-  private appplySelectFilter(doc: T, select?: string| undefined) {
+  private appplySelectFilter(doc: T, select?: string | undefined) {
     /**
      * It should select only the required fields.
      */
-     const schemaDesc = this.model.schema.obj;
-
-    if(select)
-    {
+    const schemaDesc = this.model.schema.obj;
+    console.log('select = ', select);
+    if (select) {
       let fields1 = select.split(' ');
       let only = true;
-      const toBeAdded:string[] = []
-      const onlyFields:string[] = []
-      const toBeRemoved:string[] =[]
-      
+      const toBeAdded: string[] = [];
+      const onlyFields: string[] = [];
+      const toBeRemoved: string[] = [];
+
       //get all fields to deternmine whethere we are returning only specific fields(only)
-      //or if we are removing and adding certain fields 
-      for(const field of fields1)
-      {
-        if(field.length>0)
-        {
-          if(field[0]==='+' || field[0]==='-'){
+      //or if we are removing and adding certain fields
+      for (const field of fields1) {
+        if (field.length > 0) {
+          if (field[0] === '+' || field[0] === '-') {
             only = false;
-            if(field[0]==='+')toBeAdded.push(field.substring(1))
-            else if(field[0]==='-')toBeRemoved.push(field.substring(1))
-          } 
-          else
-          {
+            if (field[0] === '+') toBeAdded.push(field.substring(1));
+            else if (field[0] === '-') toBeRemoved.push(field.substring(1));
+          } else {
             onlyFields.push(field);
           }
         }
       }
 
-      
-      if(only)
-      {
+      if (only) {
         //add only the requested fields to newDoc
-        const newDoc:T = {_id: doc._id} as T
-        for(const field of onlyFields)
-        {
-          (newDoc as any)[field] = (doc as any)[field]
+        const newDoc: T = { _id: doc._id } as T;
+        for (const field of onlyFields) {
+          (newDoc as any)[field] = (doc as any)[field];
         }
         return newDoc;
-      }
-      else
-      {
-        //add all fields and add the ones requested by the user and remocve those 
-        const newDoc = copy(doc)
+      } else {
+        //add all fields and add the ones requested by the user and remocve those
+        const newDoc = copy(doc);
         //remove all which are specified as select:false
-        for(const field in schemaDesc)
-        {
-          if((schemaDesc[field] as any).select && (schemaDesc[field] as any).select===false)
-          {
-            delete newDoc[field]
+        for (const field in schemaDesc) {
+          if ((schemaDesc[field] as any).select === false) {
+            delete newDoc[field];
           }
         }
 
         //add all fields that should be added
-        for(const field of toBeAdded)
-        {
-          if(!newDoc[field])
-          {
-            newDoc[field] = (doc as any)[field]
+        for (const field of toBeAdded) {
+          if (!newDoc[field]) {
+            newDoc[field] = (doc as any)[field];
           }
         }
 
         //remove all fields to be removed
-        for(const field of toBeRemoved)
-        {
-          if(newDoc[field])
-          {
-            delete newDoc[field]
+        for (const field of toBeRemoved) {
+          if (newDoc[field]) {
+            delete newDoc[field];
           }
         }
 
         return newDoc;
       }
-      
     }
 
-
     //if no select string is set just find the default select specified in the schema
-    const newDoc = copy(doc)
+    const newDoc = copy(doc);
     //remove all which are specified as false
-    for(const field in schemaDesc)
-    {
-      if((schemaDesc[field] as any).select && (schemaDesc[field] as any).select===false)
-      {
-        delete newDoc[field]
+    for (const field in schemaDesc) {
+      //if((schemaDesc[field] as any)['select'])console.log((schemaDesc[field] as any)['select'])
+      if ((schemaDesc[field] as any).select === false) {
+        console.log(`remove ${field} from the document`);
+        delete newDoc[field];
       }
     }
 
-    
     return newDoc;
   }
 
@@ -266,13 +243,15 @@ class Collection<T extends Document> {
       const res: T[] = [];
       const doc = this.findById(filter._id.toString(), options);
       if (doc) res.push(copy(doc));
+      res[0] = this.appplySelectFilter(res[0], options?.select);
       return res;
     }
 
     const res: T[] = [];
     for (const doc of this.documents) {
       if (this.checkMatch(filter, doc)) {
-        res.push(copy(doc));
+        const newDoc = this.appplySelectFilter(doc, options?.select);
+        res.push(copy(newDoc));
       }
     }
     return res;
@@ -358,7 +337,7 @@ class Collection<T extends Document> {
     let after: T | null = null;
     for (let i = 0; i < n; i++) {
       const document = this.documents[i];
-      if (doc._id.toString()=== document._id.toString()) {
+      if (doc._id.toString() === document._id.toString()) {
         before = copy(doc);
         for (const key in update) {
           if ((doc as any)[key] !== update[key]) {
@@ -374,7 +353,7 @@ class Collection<T extends Document> {
 
   findByIdAndUpdate(id: string, update: UpdateQuery<T>, options?: UpdateOptions): T | null {
     const doc = this.findById(id);
-    console.log('found',doc)
+    console.log('found', doc);
     if (!doc) return null;
 
     const n = this.documents.length;

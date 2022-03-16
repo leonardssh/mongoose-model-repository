@@ -14,6 +14,7 @@ const authorSchema = new Schema<IAuthor>(
     age: {
       type: Number,
       default: 100,
+      select: false,
     },
   },
   { timestamps: true }
